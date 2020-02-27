@@ -1,0 +1,3 @@
+[submodule "CPU6502"]
+	path = CPU6502
+	url = https://github.com/henryksloan/CPU6502
