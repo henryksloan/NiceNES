@@ -41,8 +41,9 @@ class MirroredRAM : public RAM {
         RAM::print();
     }
 
+ protected:
+    uint16_t map(uint16_t addr);
+
  private:
     std::vector<std::unique_ptr<Mirror>> mirrors;
-
-    uint16_t map(uint16_t addr);
 };
