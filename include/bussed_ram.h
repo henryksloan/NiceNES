@@ -5,11 +5,12 @@
 
 #include <vector>
 
-class BussedRAM : public MirroredRAM {
+template<size_t SIZE>
+class BussedRAM : public MirroredRAM<SIZE> {
  public:
-    BussedRAM(std::vector<std::unique_ptr<Mirror>> mirrors,
-        std::vector<std::unique_ptr<MappedRegisters>> mapped_registers)
-        : MirroredRAM(mirrors), mapped_registers(mapped_registers) {};
+    BussedRAM(const std::vector<std::unique_ptr<Mirror>> &mirrors,
+        const std::vector<std::unique_ptr<MappedRegisters>> &mapped_registers)
+        : MirroredRAM<SIZE>(mirrors), mapped_registers(mapped_registers) {};
 
     virtual void write_byte(short addr, uint8_t data);
     virtual void write_word(short addr, uint16_t data);
@@ -20,7 +21,7 @@ class BussedRAM : public MirroredRAM {
     virtual void print();
 
  private:
-    std::vector<std::unique_ptr<MappedRegisters>> mapped_registers;
+    const std::vector<std::unique_ptr<MappedRegisters>> &mapped_registers;
 
     std::vector<std::unique_ptr<MappedRegisters>>::iterator get_mapped_registers(uint16_t addr) {
         return std::find_if(mapped_registers.begin(), mapped_registers.end(),
