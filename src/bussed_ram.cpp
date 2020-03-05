@@ -2,7 +2,7 @@
 
 template<size_t SIZE>
 void BussedRAM<SIZE>::write_byte(short addr, uint8_t data) {
-    auto reg = get_mapped_registers(addr);
+    const auto &reg = get_mapped_registers(addr);
     if (reg != mapped_registers.end()) {
         (*reg)->write(addr, data);
     }
@@ -56,3 +56,5 @@ template<size_t SIZE>
 void BussedRAM<SIZE>::print() {
     MirroredRAM<SIZE>::print();
 }
+
+template class BussedRAM<0x10000>;
