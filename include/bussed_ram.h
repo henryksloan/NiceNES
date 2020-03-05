@@ -7,8 +7,9 @@
 
 class BussedRAM : public MirroredRAM {
  public:
-    BussedRAM(std::vector<std::unique_ptr<Mirror>> mirrors)
-        : MirroredRAM(mirrors) {};
+    BussedRAM(std::vector<std::unique_ptr<Mirror>> mirrors,
+        std::vector<std::unique_ptr<MappedRegisters>> mapped_registers)
+        : MirroredRAM(mirrors), mapped_registers(mapped_registers) {};
 
     virtual void write_byte(short addr, uint8_t data);
     virtual void write_word(short addr, uint16_t data);
