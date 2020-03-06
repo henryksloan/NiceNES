@@ -38,13 +38,15 @@ uint16_t BussedRAM<SIZE>::read_word(uint16_t addr) {
 
 template<size_t SIZE>
 uint8_t &BussedRAM<SIZE>::ref_byte(uint16_t addr) {
-    auto reg = get_mapped_registers(addr);
-    if (reg != mapped_registers.end()) {
-        return (*reg)->ref(addr);
-    }
-    else {
-        return MirroredRAM<SIZE>::ref_byte(addr);
-    }
+    // TODO: This may be a problem, but it should work since ref_callback will end up calling write_word
+    // This makes sense given the semantics of ref_callback
+    // auto reg = get_mapped_registers(addr);
+    // if (reg != mapped_registers.end()) {
+    //     return (*reg)->ref(addr);
+    // }
+    // else {
+    return MirroredRAM<SIZE>::ref_byte(addr);
+    // }
 }
 
 template<size_t SIZE>
@@ -52,7 +54,7 @@ void BussedRAM<SIZE>::ref_callback(uint8_t &data) {
     auto mem_p = MirroredRAM<SIZE>::mem.data();
     auto mem_len = MirroredRAM<SIZE>::mem.size();
     if ((&data >= mem_p) && (&data < (mem_p+mem_len))) {
-        write_word((&data)-mem_p, data);
+        write_byte((&data)-mem_p, data);
     }
 }
 

@@ -11,14 +11,18 @@ class BitMask {
     BitMask(uint16_t &parent, uint16_t mask)
         : parent((int &) parent), mask(mask), offset(std::log2(mask & -mask)) {}
 
-    operator uint8_t() const {
+    operator int() const {
         return (parent & mask) >> offset;
     }
 
-    BitMask &operator=(uint8_t val) {
+    BitMask &operator=(int val) {
         parent &= ~mask;
         parent |= ((val << offset) && mask);
         return *this;
+    }
+
+    BitMask &operator=(const BitMask &other) {
+        return operator=((int) other);
     }
 
  private:

@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <map>
 
 // From https://github.com/daniel5151/ANESE
 namespace PPURegisters {
@@ -33,37 +34,40 @@ class PPU {
 
  private:
     std::shared_ptr<Memory> mem;
+    std::shared_ptr<Memory> oam;
+    std::shared_ptr<Memory> oam_2;
 
     struct /* ppuctrl */ : Register {
-        const BitMask V{raw, 0x80};
-        const BitMask P{raw, 0x40};
-        const BitMask H{raw, 0x20};
-        const BitMask B{raw, 0x10};
-        const BitMask S{raw, 0x08};
-        const BitMask I{raw, 0x04};
-        const BitMask N{raw, 0x03};
+        BitMask V{raw, 0x80};
+        BitMask P{raw, 0x40};
+        BitMask H{raw, 0x20};
+        BitMask B{raw, 0x10};
+        BitMask S{raw, 0x08};
+        BitMask I{raw, 0x04};
+        BitMask N{raw, 0x03};
         using Register::operator uint8_t;
         using Register::operator=;
     } ppuctrl;
 
     struct /* ppumask */ : Register {
-        const BitMask B{raw, 0x80};
-        const BitMask G{raw, 0x40};
-        const BitMask R{raw, 0x20};
-        const BitMask s{raw, 0x10};
-        const BitMask b{raw, 0x08};
-        const BitMask M{raw, 0x04};
-        const BitMask m{raw, 0x02};
-        const BitMask g{raw, 0x01};
+        BitMask B{raw, 0x80};
+        BitMask G{raw, 0x40};
+        BitMask R{raw, 0x20};
+        BitMask s{raw, 0x10};
+        BitMask b{raw, 0x08};
+        BitMask M{raw, 0x04};
+        BitMask m{raw, 0x02};
+        BitMask g{raw, 0x01};
         using Register::operator uint8_t;
         using Register::operator=;
     } ppumask;
 
     struct /* ppustatus */ : Register {
-        const BitMask V{raw, 0x80};
-        const BitMask S{raw, 0x40};
-        const BitMask O{raw, 0x20};
-        const BitMask etc{raw, 0x1F};
+        BitMask high3{raw, 0xE0};
+        BitMask V{raw, 0x80};
+        BitMask S{raw, 0x40};
+        BitMask O{raw, 0x20};
+        // Last 5 bytes are junk, i.e. read from bus latch
         using Register::operator uint8_t;
         using Register::operator=;
     } ppustatus;
@@ -81,5 +85,11 @@ class PPU {
     } v, t;
 
     uint8_t x;
-    uint8_t write_toggle;
+    bool write_toggle;
+
+    struct /* bus_latch */ : Register {
+        BitMask low5{raw, 0x1F};
+        using RegisterTemplate::operator uint8_t;
+        using RegisterTemplate::operator=;
+    } bus_latch;
 };

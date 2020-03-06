@@ -8,7 +8,7 @@ template<typename T>
 struct RegisterTemplate {
     T raw;
 
-    operator T() const { return raw; }
+    operator T() { return raw; }
     T &operator=(T val) {
         raw = val;
         return raw;
@@ -21,8 +21,8 @@ typedef struct Register : RegisterTemplate<uint8_t> {
 } Register;
 
 typedef struct Register16 : RegisterTemplate<uint16_t> {
-    const BitMask hi{raw, 0xFF00};
-    const BitMask lo{raw, 0x00FF};
+    BitMask hi{raw, 0xFF00};
+    BitMask lo{raw, 0x00FF};
 
     using RegisterTemplate<uint16_t>::operator uint16_t;
     using RegisterTemplate<uint16_t>::operator=;
