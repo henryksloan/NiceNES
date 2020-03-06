@@ -23,6 +23,6 @@ class BitMask {
 
  private:
     int &parent;
-    const uint8_t mask;
+    const int mask;
     const int offset;
 };
