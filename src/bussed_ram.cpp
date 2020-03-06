@@ -1,7 +1,7 @@
 #include "bussed_ram.h"
 
 template<size_t SIZE>
-void BussedRAM<SIZE>::write_byte(short addr, uint8_t data) {
+void BussedRAM<SIZE>::write_byte(uint16_t addr, uint8_t data) {
     const auto &reg = get_mapped_registers(addr);
     if (reg != mapped_registers.end()) {
         (*reg)->write(addr, data);
@@ -12,7 +12,7 @@ void BussedRAM<SIZE>::write_byte(short addr, uint8_t data) {
 }
 
 template<size_t SIZE>
-void BussedRAM<SIZE>::write_word(short addr, uint16_t data) {
+void BussedRAM<SIZE>::write_word(uint16_t addr, uint16_t data) {
     // TODO: Fix edge case behavior of word write to mapped registers
     // Should probably just treat it as two seperate writes
     MirroredRAM<SIZE>::write_word(addr, data);
@@ -44,6 +44,15 @@ uint8_t &BussedRAM<SIZE>::ref_byte(uint16_t addr) {
     }
     else {
         return MirroredRAM<SIZE>::ref_byte(addr);
+    }
+}
+
+template<size_t SIZE>
+void BussedRAM<SIZE>::ref_callback(uint8_t &data) {
+    auto mem_p = MirroredRAM<SIZE>::mem.data();
+    auto mem_len = MirroredRAM<SIZE>::mem.size();
+    if ((&data >= mem_p) && (&data < (mem_p+mem_len))) {
+        write_word((&data)-mem_p, data);
     }
 }
 

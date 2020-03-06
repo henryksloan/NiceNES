@@ -14,11 +14,11 @@ class MirroredRAM : public RAM<SIZE> {
     MirroredRAM(const std::vector<std::unique_ptr<Mirror>> &mirrors)
         : mirrors(mirrors) {};
 
-    virtual inline void write_byte(short addr, uint8_t data) {
+    virtual inline void write_byte(uint16_t addr, uint8_t data) {
         RAM<SIZE>::write_byte(map(addr), data);
     }
 
-    virtual inline void write_word(short addr, uint16_t data) {
+    virtual inline void write_word(uint16_t addr, uint16_t data) {
         RAM<SIZE>::write_word(map(addr), data);
     }
 
