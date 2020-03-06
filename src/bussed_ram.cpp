@@ -52,10 +52,8 @@ void BussedRAM<SIZE>::ref_callback(uint8_t &data) {
     auto mem_p = MirroredRAM<SIZE>::mem.data();
     auto mem_len = MirroredRAM<SIZE>::mem.size();
     if ((&data >= mem_p) && (&data < (mem_p+mem_len))) {
-        std::cout << "Data is in mem! at 0x" << std::hex << (long) ((&data)-mem_p) << std::endl;
         write_word((&data)-mem_p, data);
     }
-
 }
 
 template<size_t SIZE>
