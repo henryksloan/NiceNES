@@ -32,6 +32,8 @@ class PPU {
     uint8_t &register_ref(uint16_t addr);
     void register_write(uint16_t addr, uint8_t data);
 
+    void cycle();
+
  private:
     std::shared_ptr<Memory> mem;
     std::shared_ptr<Memory> oam;
@@ -75,21 +77,57 @@ class PPU {
     uint8_t oamaddr;
     uint8_t oamdata;
 
-    struct /* v, t */ : Register16 {
-        BitMask y{raw, 0x7000};
-        BitMask N{raw, 0x0C00};
-        BitMask Y{raw, 0x03E0};
-        BitMask X{raw, 0x001F};
-        using RegisterTemplate::operator uint16_t;
-        using RegisterTemplate::operator=;
-    } v, t;
-
     uint8_t x;
-    bool write_toggle;
 
     struct /* bus_latch */ : Register {
         BitMask low5{raw, 0x1F};
         using RegisterTemplate::operator uint8_t;
         using RegisterTemplate::operator=;
     } bus_latch;
+
+    struct /* back */ {
+        struct /* v, t */ : Register16 {
+            BitMask y{raw, 0x7000};
+            BitMask N{raw, 0x0C00};
+            BitMask Y{raw, 0x03E0};
+            BitMask X{raw, 0x001F};
+            using RegisterTemplate::operator uint16_t;
+            using RegisterTemplate::operator=;
+        } v, t;
+        bool write_latch;
+
+        // Temporary latches for background fetches
+        struct /* latches */ {
+            uint8_t nt;
+            uint8_t attr;
+            uint8_t tile_lo;
+            uint8_t tile_hi;
+        } latches;
+
+        uint16_t tile[2];
+
+        uint8_t attr[2];
+        bool attr_latch[2];
+    } back;
+
+    struct /* sprites */ {
+        Register16 patt[8];
+        uint8_t attr[8];
+        uint8_t xpos[8];
+    } sprites;
+
+    struct /* scan */ {
+        unsigned line;
+        unsigned cycle;
+        bool odd_frame;
+    } scan;
+
+    void clear_oam2();
+    void back_fetch();
+    void sprite_fetch();
+    void sprite_eval();
+    void pre_or_visible_cycle();
+
+    void prerender_line();
+    void visible_line();
 };
