@@ -25,9 +25,10 @@ namespace PPURegisters {
 
 class PPU {
  public:
-    PPU(std::shared_ptr<Memory> mem, std::function<void()> nmi)
-        : mem(mem), nmi(nmi) {};
+    PPU(std::shared_ptr<Memory> mem)
+        : mem(mem) {};
 
+    void set_nmi(std::function<void()> nmi) { this->nmi = nmi; }
     uint8_t register_read(uint16_t addr);
     void register_write(uint16_t addr, uint8_t data);
 
