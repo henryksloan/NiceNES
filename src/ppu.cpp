@@ -27,13 +27,6 @@ uint8_t PPU::register_read(uint16_t addr) {
     }
 }
 
-// TODO: This may not be necassary at all
-// ref_byte will always correspond with a ref_callback, thus calling write_byte
-uint8_t &PPU::register_ref(uint16_t addr) {
-    uint8_t x = 5;
-    return x;
-}
-
 void PPU::register_write(uint16_t addr, uint8_t data) {
     using namespace PPURegisters;
 

@@ -6,9 +6,7 @@ void BussedRAM<SIZE>::write_byte(uint16_t addr, uint8_t data) {
     if (reg != mapped_registers.end()) {
         (*reg)->write(addr, data);
     }
-    else {
-        MirroredRAM<SIZE>::write_byte(addr, data);
-    }
+    MirroredRAM<SIZE>::write_byte(addr, data);
 }
 
 template<size_t SIZE>
@@ -24,9 +22,7 @@ uint16_t BussedRAM<SIZE>::read_byte(uint16_t addr) {
     if (reg != mapped_registers.end()) {
         return (*reg)->read(addr);
     }
-    else {
-        return MirroredRAM<SIZE>::read_byte(addr);
-    }
+    return MirroredRAM<SIZE>::read_byte(addr);
 }
 
 template<size_t SIZE>

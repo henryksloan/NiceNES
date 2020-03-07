@@ -14,12 +14,10 @@ NES::NES() {
     auto ram_mirror = std::make_unique<Mirror>(0x0800, 0x1FFF, 0x0000, 0x07FF);
     auto ppu_reg_map = std::make_unique<MappedRegisters>(0x2000, 0x2007,
             std::bind(&PPU::register_read, ppu.get(), std::placeholders::_1),
-            std::bind(&PPU::register_ref, ppu.get(), std::placeholders::_1),
             std::bind(&PPU::register_write, ppu.get(), std::placeholders::_1, std::placeholders::_2));
     auto ppu_reg_mirror = std::make_unique<Mirror>(0x2008, 0x3FFF, 0x2000, 0x2007);
     // auto apu_reg_map = std::make_unique<MappedRegisters>(0x4000, 0x4017,
     //         std::bind(&APU::register_read, &apu, std::placeholders::_1),
-    //         std::bind(&APU::register_ref, &apu, std::placeholders::_1),
     //         std::bind(&APU::register_write, &apu, std::placeholders::_1, std::placeholders::_2));
     std::vector<std::unique_ptr<Mirror>> mirrors;
     mirrors.push_back(std::move(ram_mirror));
