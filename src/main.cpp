@@ -1,5 +1,6 @@
 #include "bussed_ram.h"
 #include "ppu.h"
+#include "cpu_6502.h"
 
 #include <iostream>
 #include <memory>
@@ -8,6 +9,8 @@ int main(int argc, char **argv) {
     std::cout << "Welcome to NiceNES!" << std::endl;
 
     // TEST COPY OF `nes.cpp` CODE
+    std::unique_ptr<CPU6502> cpu;
+    std::unique_ptr<PPU> ppu;
 
     // PPU memory map
     auto nametable_mirror = std::make_unique<Mirror>(0x3000, 0x3EFF, 0x2000, 0x2EFF);
@@ -16,7 +19,7 @@ int main(int argc, char **argv) {
     ppu_mirrors.push_back(std::move(nametable_mirror));
     ppu_mirrors.push_back(std::move(palette_mirror));
     auto ppu_ram = std::make_shared<MirroredRAM<0x4000>>(std::move(ppu_mirrors));
-    auto ppu = std::make_unique<PPU>(ppu_ram);
+    ppu = std::make_unique<PPU>(ppu_ram, std::bind(&CPU6502::nmi, cpu.get()));
 
     // CPU memory map
     auto ram_mirror = std::make_unique<Mirror>(0x0800, 0x1FFF, 0x0000, 0x07FF);
@@ -33,6 +36,7 @@ int main(int argc, char **argv) {
     std::vector<std::unique_ptr<MappedRegisters>> reg_maps;
     reg_maps.push_back(std::move(ppu_reg_map));
     auto main_ram = std::make_shared<BussedRAM<0x10000>>(std::move(mirrors), std::move(reg_maps));
+    cpu = std::make_unique<CPU6502>(main_ram);
 
     uint8_t x = 5;
     main_ram->ref_callback(x);

@@ -34,10 +34,13 @@ void PPU::register_write(uint16_t addr, uint8_t data) {
 
     switch (addr) {
         case PPUCTRL: {
-            uint8_t temp = ppuctrl;
+            auto old_V = ppuctrl.V;
             ppuctrl = data;
+            bool toggled_V_on = !old_V && ppuctrl.V;
+            if (toggled_V_on && ppustatus.V) {
+                nmi();
+            }
             back.t.N = ppuctrl.N;
-            // TODO: NMI on rising edge of V
         } break;
         case PPUMASK: {
             ppumask = data;
@@ -81,6 +84,9 @@ void PPU::register_write(uint16_t addr, uint8_t data) {
     }
 }
 
+void PPU::clear_oam2() {
+}
+
 void PPU::back_fetch() {
     // Tile data is fetched on cycles 1-256
     // Each tile takes 8 cycles: 4 accesses taking 2 cycles each
@@ -110,6 +116,12 @@ void PPU::back_fetch() {
             back.latches.tile_lo = mem->read_byte(tile_addr+8);
         } break;
     }
+}
+
+void PPU::sprite_fetch() {
+}
+
+void PPU::sprite_eval() {
 }
 
 void PPU::pre_or_visible_cycle() {
@@ -145,7 +157,6 @@ void PPU::prerender_line() {
         ppustatus.V = 0;
         ppustatus.S = 0;
         ppustatus.O = 0;
-        // TODO: VBlank NMI?
     }
 }
 
@@ -170,7 +181,9 @@ void PPU::cycle() {
     }
     else if (scan.line == 241 && scan.cycle == 1) { // VBlank tick
         ppustatus.V = 1;
-        // TODO: Generate NMI if ppuctrl.V
+        if (ppuctrl.V) {
+            nmi();
+        }
     }
 
     scan.cycle++;

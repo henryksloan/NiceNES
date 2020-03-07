@@ -6,7 +6,7 @@
 
 #include <cstdint>
 #include <memory>
-#include <map>
+#include <functional>
 
 // From https://github.com/daniel5151/ANESE
 namespace PPURegisters {
@@ -25,11 +25,10 @@ namespace PPURegisters {
 
 class PPU {
  public:
-    PPU(std::shared_ptr<Memory> mem)
-        : mem(mem) {};
+    PPU(std::shared_ptr<Memory> mem, std::function<void()> nmi)
+        : mem(mem), nmi(nmi) {};
 
     uint8_t register_read(uint16_t addr);
-    uint8_t &register_ref(uint16_t addr);
     void register_write(uint16_t addr, uint8_t data);
 
     void cycle();
@@ -121,6 +120,8 @@ class PPU {
         unsigned cycle;
         bool odd_frame;
     } scan;
+
+    std::function<void()> nmi;
 
     void clear_oam2();
     void back_fetch();
