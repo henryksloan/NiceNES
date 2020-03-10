@@ -22,7 +22,7 @@ class MirroredRAM : public RAM<SIZE> {
         RAM<SIZE>::write_word(map(addr), data);
     }
 
-    virtual inline uint16_t read_byte(uint16_t addr) {
+    virtual inline uint8_t read_byte(uint16_t addr) {
         return RAM<SIZE>::read_byte(map(addr));
     }
 

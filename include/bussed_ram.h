@@ -14,7 +14,7 @@ class BussedRAM : public MirroredRAM<SIZE> {
 
     virtual void write_byte(uint16_t addr, uint8_t data);
     virtual void write_word(uint16_t addr, uint16_t data);
-    virtual uint16_t read_byte(uint16_t addr);
+    virtual uint8_t read_byte(uint16_t addr);
     virtual uint16_t read_word(uint16_t addr);
     virtual uint8_t &ref_byte(uint16_t addr);
     virtual void ref_callback(uint8_t &data);

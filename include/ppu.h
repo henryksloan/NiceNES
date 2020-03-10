@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "register.h"
 #include "bit_mask.h"
+#include "cpu_accessor.h"
 
 #include <cstdint>
 #include <memory>
@@ -25,10 +26,9 @@ namespace PPURegisters {
 
 class PPU {
  public:
-    PPU(std::shared_ptr<Memory> mem)
-        : mem(mem) {};
+    PPU(std::shared_ptr<Memory> mem, const CPUAccessor &cpu_accessor)
+        : mem(mem), cpu_accessor(cpu_accessor) {};
 
-    void set_nmi(std::function<void()> nmi) { this->nmi = nmi; }
     uint8_t register_read(uint16_t addr);
     void register_write(uint16_t addr, uint8_t data);
 
@@ -37,7 +37,9 @@ class PPU {
  private:
     std::shared_ptr<Memory> mem;
     std::shared_ptr<Memory> oam;
-    std::shared_ptr<Memory> oam_2;
+    std::shared_ptr<Memory> oam2;
+
+    const CPUAccessor &cpu_accessor;
 
     struct /* ppuctrl */ : Register {
         BitMask V{raw, 0x80};
@@ -121,8 +123,6 @@ class PPU {
         unsigned cycle;
         bool odd_frame;
     } scan;
-
-    std::function<void()> nmi;
 
     void clear_oam2();
     void back_fetch();

@@ -17,7 +17,7 @@ void BussedRAM<SIZE>::write_word(uint16_t addr, uint16_t data) {
 }
 
 template<size_t SIZE>
-uint16_t BussedRAM<SIZE>::read_byte(uint16_t addr) {
+uint8_t BussedRAM<SIZE>::read_byte(uint16_t addr) {
     auto reg = get_mapped_registers(addr);
     if (reg != mapped_registers.end()) {
         return (*reg)->read(addr);

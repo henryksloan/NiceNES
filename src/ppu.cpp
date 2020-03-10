@@ -5,15 +5,33 @@ uint8_t PPU::register_read(uint16_t addr) {
 
     switch (addr) {
         case PPUSTATUS: {
-            // TODO: Race condition
             uint8_t high3 = ppustatus.high3;
+
+            /*
+             * "Race condition: Reading PPUSTATUS within two cycles of the start of
+             * vertical blank will return 0 in bit 7 but clear the latch anyway,
+             * causing NMI to not occur that frame."
+             * (https://wiki.nesdev.com/w/index.php/PPU_programmer_reference#Status_.28.242002.29_.3C_read)
+             */
+            if (scan.line == 241 && scan.cycle == 0)
+                high3 &= ~0x80;
             ppustatus.V = 0;
             back.write_latch = 0;
             return (high3 << 5) | bus_latch.low5;
         }
         case OAMDATA: {
-            // TODO: https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
-            return oam->read_byte(oamaddr);
+            /*
+             * Reading OAMDATA during secondary OAM clear returns 0xFF
+             * This is because the clear of secondary OAM is done by reading
+             * and writing from OAM as usual, but with all reads forced to 0xFF
+             * https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation#Details
+             */
+            bool pre_or_visible_line = scan.line < 240;
+            bool oam2_clearing = scan.cycle >= 1 && scan.cycle <= 64;
+            if (pre_or_visible_line && oam2_clearing)
+                return 0xFF;
+            else
+                return oam->read_byte(oamaddr);
         }
         case PPUDATA: {
             addr = back.v;
@@ -38,7 +56,7 @@ void PPU::register_write(uint16_t addr, uint8_t data) {
             ppuctrl = data;
             bool toggled_V_on = !old_V && ppuctrl.V;
             if (toggled_V_on && ppustatus.V) {
-                nmi();
+                cpu_accessor.nmi();
             }
             back.t.N = ppuctrl.N;
         } break;
@@ -101,7 +119,7 @@ void PPU::back_fetch() {
                 | ((back.v >> 4) & 0x38)
                 | ((back.v >> 2) & 0x07);
             back.latches.attr = mem->read_byte(attr_addr);
-            // TODO: Does this already take coarse x and y into account
+            // TODO: Does this already take coarse x and y into account?
         } break;
         case 4: { // Pattern table tile low
             uint16_t tile_addr = ppuctrl.B * 0x1000
@@ -198,7 +216,7 @@ void PPU::cycle() {
     else if (scan.line == 241 && scan.cycle == 1) { // VBlank tick
         ppustatus.V = 1;
         if (ppuctrl.V) {
-            nmi();
+            cpu_accessor.nmi();
         }
     }
 
