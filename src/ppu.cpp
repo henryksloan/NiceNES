@@ -93,8 +93,19 @@ void PPU::register_write(uint16_t addr, uint8_t data) {
             mem->write_byte(back.v, data);
             back.v = back.v + ((ppuctrl.I) ? 32 : 1);
         } break;
-        case OAMDMA: {
-            // TODO: Suspend CPU and transfer 0xXX00 to 0xXXFF to OAM
+        case OAMDMA: { // Suspend CPU and transfer 0xXX00 to 0xXXFF to OAM
+            cpu_cycle(); // "dummy read cycle while waiting for writes to complete"
+            if ((scan.total_cycles / 3) % 2) // "+1 if on an odd CPU cycle"
+                cpu_cycle();
+
+            // "256 alternating read/write cycles"
+            uint8_t temp;
+            for (int i = 0; i < 256; i++) {
+                temp = cpu_accessor.read_byte((data << 8) | i);
+                cpu_cycle();
+                oam->write_byte(i, temp);
+                cpu_cycle();
+            }
         } break;
         default: {
             // TODO: Handle error
@@ -102,7 +113,44 @@ void PPU::register_write(uint16_t addr, uint8_t data) {
     }
 }
 
+void PPU::cycle() {
+    if (scan.line == 261) { // Pre-render scanline
+        prerender_line();
+    }
+    else if (scan.line < 240) { // Visible scanlines
+        visible_line();
+    }
+    else if (scan.line == 240) { // Post-render scanline
+        // Idle
+    }
+    else if (scan.line == 241 && scan.cycle == 1) { // VBlank tick
+        ppustatus.V = 1;
+        if (ppuctrl.V) {
+            cpu_accessor.nmi();
+        }
+    }
+
+    scan.total_cycles++;
+    scan.cycle++;
+    if (scan.cycle > 340) {
+        scan.cycle = 0;
+        scan.line++;
+
+        if (scan.line > 261) {
+            scan.line = 0;
+            scan.odd_frame = !scan.odd_frame;
+        }
+    }
+}
+
+void PPU::cpu_cycle() {
+    for (int i = 0; i < 3; i++) cycle();
+}
+
 void PPU::clear_oam2() {
+    for (uint addr = 0; addr < 32; addr++) {
+        oam2->write_byte(addr, 0xFF);
+    }
 }
 
 void PPU::back_fetch() {
@@ -156,6 +204,7 @@ void PPU::sprite_fetch() {
 }
 
 void PPU::sprite_eval() {
+    // TODO: https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
 }
 
 void PPU::pre_or_visible_cycle() {
@@ -201,32 +250,4 @@ void PPU::visible_line() {
     if (scan.cycle == 65) sprite_eval();
 
     // TODO: Draw to framebuf
-}
-
-void PPU::cycle() {
-    if (scan.line == 261) { // Pre-render scanline
-        prerender_line();
-    }
-    else if (scan.line < 240) { // Visible scanlines
-        visible_line();
-    }
-    else if (scan.line == 240) { // Post-render scanline
-        // Idle
-    }
-    else if (scan.line == 241 && scan.cycle == 1) { // VBlank tick
-        ppustatus.V = 1;
-        if (ppuctrl.V) {
-            cpu_accessor.nmi();
-        }
-    }
-
-    scan.cycle++;
-    if (scan.cycle > 340) {
-        scan.cycle = 0;
-        scan.line++;
-
-        if (scan.line > 261) {
-            scan.line = 0;
-        }
-    }
 }

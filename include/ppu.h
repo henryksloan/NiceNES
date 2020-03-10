@@ -26,13 +26,17 @@ namespace PPURegisters {
 
 class PPU {
  public:
-    PPU(std::shared_ptr<Memory> mem, const CPUAccessor &cpu_accessor)
-        : mem(mem), cpu_accessor(cpu_accessor) {};
+    PPU(std::shared_ptr<Memory> mem,
+        std::shared_ptr<Memory> oam,
+        std::shared_ptr<Memory> oam2,
+        const CPUAccessor &cpu_accessor)
+        : mem(mem), oam(oam), oam2(oam2), cpu_accessor(cpu_accessor) {};
 
     uint8_t register_read(uint16_t addr);
     void register_write(uint16_t addr, uint8_t data);
 
     void cycle();
+    void cpu_cycle(); // Run the number of PPU cycles per one CPU cycle (NTSC: 3)
 
  private:
     std::shared_ptr<Memory> mem;
@@ -121,6 +125,7 @@ class PPU {
     struct /* scan */ {
         unsigned line;
         unsigned cycle;
+        unsigned total_cycles;
         bool odd_frame;
     } scan;
 
