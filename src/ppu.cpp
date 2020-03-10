@@ -119,6 +119,22 @@ void PPU::back_fetch() {
 }
 
 void PPU::sprite_fetch() {
+    // Sprite data is fetched on cycles 257-320
+    // Each sprite tile takes 8 cycles: 4 accesses taking 2 cycles each
+    switch ((scan.cycle - 1) % 8) {
+        case 0: { // Garbage nametable byte
+            // TODO
+        } break;
+        case 2: { // Garbage nametable byte
+            // TODO
+        } break;
+        case 4: { // Pattern table tile low
+            // TODO
+        } break;
+        case 6: { // Pattern table tile high
+            // TODO
+        } break;
+    }
 }
 
 void PPU::sprite_eval() {
