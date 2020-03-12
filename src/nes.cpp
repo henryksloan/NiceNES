@@ -10,7 +10,9 @@ NES::NES() {
     ppu_mirrors.push_back(std::move(nametable_mirror));
     ppu_mirrors.push_back(std::move(palette_mirror));
     auto ppu_ram = std::make_shared<MirroredRAM<0x4000>>(std::move(ppu_mirrors));
-    ppu = std::make_unique<PPU>(ppu_ram, cpu_accessor);
+    auto oam_ram = std::make_shared<RAM<0x100>>();
+    auto oam2_ram = std::make_shared<RAM<0x20>>();
+    ppu = std::make_unique<PPU>(ppu_ram, oam_ram, oam2_ram, cpu_accessor);
 
     // CPU memory map
     auto ram_mirror = std::make_unique<Mirror>(0x0800, 0x1FFF, 0x0000, 0x07FF);
