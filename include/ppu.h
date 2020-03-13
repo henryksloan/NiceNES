@@ -110,7 +110,7 @@ class PPU {
             uint8_t tile_hi;
         } latches;
 
-        uint16_t tile[2];
+        Register16 tile[2];
 
         uint8_t attr[2];
         bool attr_latch[2];

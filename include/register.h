@@ -13,11 +13,16 @@ struct RegisterTemplate {
         raw = val;
         return raw;
     }
+
+    T &operator&=(T val) { return operator=(raw & val); }
+    T &operator|=(T val) { return operator=(raw | val); }
 };
 
 typedef struct Register : RegisterTemplate<uint8_t> {
     using RegisterTemplate<uint8_t>::operator uint8_t;
     using RegisterTemplate<uint8_t>::operator=;
+    using RegisterTemplate<uint8_t>::operator&=;
+    using RegisterTemplate<uint8_t>::operator|=;
 } Register;
 
 typedef struct Register16 : RegisterTemplate<uint16_t> {
@@ -26,4 +31,6 @@ typedef struct Register16 : RegisterTemplate<uint16_t> {
 
     using RegisterTemplate<uint16_t>::operator uint16_t;
     using RegisterTemplate<uint16_t>::operator=;
+    using RegisterTemplate<uint16_t>::operator&=;
+    using RegisterTemplate<uint16_t>::operator|=;
 } Register16;
