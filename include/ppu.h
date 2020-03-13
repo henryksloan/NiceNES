@@ -129,7 +129,7 @@ class PPU {
         bool odd_frame;
     } scan;
 
-    void clear_oam2();
+    void clear_oam2_byte();
     void back_fetch();
     void sprite_fetch();
     void sprite_eval();

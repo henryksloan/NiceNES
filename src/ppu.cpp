@@ -147,9 +147,9 @@ void PPU::cpu_cycle() {
     for (int i = 0; i < 3; i++) cycle();
 }
 
-void PPU::clear_oam2() {
-    for (uint addr = 0; addr < 32; addr++) {
-        oam2->write_byte(addr, 0xFF);
+void PPU::clear_oam2_byte() {
+    if (scan.cycle % 2 == 1) {
+        oam2->write_byte((scan.cycle - 1) / 2, 0xFF);
     }
 }
 
@@ -157,29 +157,47 @@ void PPU::back_fetch() {
     // Tile data is fetched on cycles 1-256
     // Each tile takes 8 cycles: 4 accesses taking 2 cycles each
     switch ((scan.cycle - 1) % 8) {
-        case 0: { // Nametable byte
+        case 0: { // Feed from latches to shift registers
+            /*
+             * Every 8 cycles, the top byte of the each of the two
+             * 16-bit tile shift registers are filled by the latches.
+             * These registers correspond to a tile's high and low pattern table bytes
+             */
+            back.tile[0] &= 0xFF00;
+            back.tile[0] |= back.latches.tile_lo;
+            back.tile[1] &= 0xFF00;
+            back.tile[1] |= back.latches.tile_hi;
+
+            // Likewise, these two bits are the high and low attribute bytes
+            // This latch is later shifted into the attribute shift registers `attr`
+            back.attr_latch[0] = back.latches.attr & 1;
+            back.attr_latch[1] = back.latches.attr & 2;
+        } break;
+        case 1: { // Nametable byte
             uint16_t tile_addr = 0x2000 | (back.v & 0x0FFF);
             back.latches.nt = mem->read_byte(tile_addr);
         } break;
-        case 2: { // Attribute table byte
+        case 3: { // Attribute table byte
             uint16_t attr_addr = 0x23C0
                 | (back.v & 0x0C00)
                 | ((back.v >> 4) & 0x38)
                 | ((back.v >> 2) & 0x07);
             back.latches.attr = mem->read_byte(attr_addr);
-            // TODO: Does this already take coarse x and y into account?
+            // TODO: Check this
+            if (back.v.Y & 2) back.latches.attr >>= 4;
+            if (back.v.X & 2) back.latches.attr >>= 2;
         } break;
-        case 4: { // Pattern table tile low
+        case 5: { // Pattern table tile low
             uint16_t tile_addr = ppuctrl.B * 0x1000
                 + back.latches.nt * 16
                 + back.v.y;
             back.latches.tile_lo = mem->read_byte(tile_addr);
         } break;
-        case 6: { // Pattern table tile high
+        case 7: { // Pattern table tile high
             uint16_t tile_addr = ppuctrl.B * 0x1000
                 + back.latches.nt * 16
                 + back.v.y;
-            back.latches.tile_lo = mem->read_byte(tile_addr+8);
+            back.latches.tile_hi = mem->read_byte(tile_addr+8);
         } break;
     }
 }
@@ -246,8 +264,12 @@ void PPU::prerender_line() {
 void PPU::visible_line() {
     pre_or_visible_cycle();
 
-    if (scan.cycle == 1) clear_oam2();
-    if (scan.cycle == 65) sprite_eval();
+    if (scan.cycle >= 1 && scan.cycle <= 64) {
+        clear_oam2_byte();
+    }
+    else if (scan.cycle >= 65 && scan.cycle <= 256) {
+        sprite_eval();
+    }
 
     // TODO: Draw to framebuf
 }
