@@ -3,6 +3,8 @@
 #include "cpu_6502.h"
 #include "apu.h"
 #include "ppu.h"
+#include "ram.h"
+#include "mirrored_ram.h"
 #include "bussed_ram.h"
 #include "mirror.h"
 
