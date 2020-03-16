@@ -14,7 +14,9 @@ enum class MirroringMode {
 class Cartridge {
  public:
     Cartridge(std::ifstream &file)
-        : meta(populate_rom(file)) {};
+        : meta(parse_header(file)) {
+        populate_rom(file);
+    };
 
     const struct MetaData {
         int n_prg_banks;
@@ -28,7 +30,8 @@ class Cartridge {
     } meta;
 
  private:
-    MetaData populate_rom(std::ifstream &file);
+    MetaData parse_header(std::ifstream &file);
+    void populate_rom(std::ifstream &file);
 
     std::vector<uint8_t> prg; // Program ROM
     std::vector<uint8_t> chr; // Character ROM
