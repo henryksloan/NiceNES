@@ -3,6 +3,9 @@
 #include <fstream>
 #include <vector>
 
+#include <iterator>
+#include <iostream>
+
 enum class MirroringMode {
     HORIZONTAL,
     VERTICAL,
@@ -30,6 +33,7 @@ class Cartridge {
     } meta;
 
  private:
+    // parse_header populates meta, leaving file iterator right after the header
     MetaData parse_header(std::ifstream &file);
     void populate_rom(std::ifstream &file);
 

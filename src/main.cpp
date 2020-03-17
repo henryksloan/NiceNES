@@ -13,6 +13,10 @@ int main(int argc, char **argv) {
     NES nes;
 
     std::ifstream file(argv[1], std::ifstream::binary);
+    if (!file) {
+        std::cerr << "Could not read file " << argv[1] << std::endl;
+        return 1;
+    }
     Cartridge cart(file);
 
     return 0;

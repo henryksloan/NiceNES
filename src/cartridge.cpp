@@ -43,10 +43,10 @@ void Cartridge::populate_rom(std::ifstream &file) {
 
     if (meta.is_PC10) {
         pc_irom.resize(8192);
-        file.read((char*) pc_irom.data(), pc_irom.size());
+        file.read((char*) &pc_irom[0], pc_irom.size());
         if (file.is_open()) {
             pc_prom.resize(32);
-            file.read((char*) pc_prom.data(), pc_prom.size());
+            file.read((char*) &pc_prom[0], pc_prom.size());
         }
     }
 }
