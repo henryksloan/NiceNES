@@ -10,6 +10,7 @@
 #include <functional>
 
 // From https://github.com/daniel5151/ANESE
+// TODO: Replace with enum class
 namespace PPURegisters {
     enum Reg : uint16_t {
         PPUCTRL   = 0x2000,

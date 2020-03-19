@@ -1,5 +1,43 @@
 #include "cartridge.h"
 
+bool Cartridge::read_byte(MapperResult target, uint16_t addr, uint8_t &data) {
+    uint16_t mapped_addr;
+    auto result = mapper->map_read(addr, mapped_addr);
+    if (result != target) return false;
+    switch(result) {
+        case MapperResult::PRG:
+            data = prg[mapped_addr];
+            break;
+        case MapperResult::CHR:
+            data = chr[mapped_addr];
+            break;
+        case MapperResult::NONE:
+            break;
+    }
+    return true;
+}
+
+bool Cartridge::write_byte(MapperResult target, uint16_t addr, uint8_t data) {
+    uint16_t mapped_addr;
+    auto result = mapper->map_write(addr, mapped_addr, data);
+    if (result != target) return false;
+    switch(result) {
+        case MapperResult::PRG:
+            prg[mapped_addr] = data;
+            break;
+        case MapperResult::CHR:
+            chr[mapped_addr] = data;
+            break;
+        case MapperResult::NONE:
+            break;
+    }
+    return true;
+}
+
+void Cartridge::reset() {
+    if (mapper != nullptr) mapper->reset();
+}
+
 Cartridge::MetaData Cartridge::parse_header(std::ifstream &file) {
     struct {
         char NES_label[4];
@@ -48,5 +86,16 @@ void Cartridge::populate_rom(std::ifstream &file) {
             pc_prom.resize(32);
             file.read((char*) &pc_prom[0], pc_prom.size());
         }
+    }
+}
+
+template<typename T>
+std::shared_ptr<Mapper> Cartridge::make_mapper() {
+    return std::make_shared<T>(meta.n_prg_banks, meta.n_chr_banks);
+}
+
+void Cartridge::init_mapper() {
+    switch (meta.mapper) {
+        case   0: mapper = make_mapper<Mapper_000>(); break;
     }
 }

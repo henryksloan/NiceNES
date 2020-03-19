@@ -17,7 +17,9 @@ int main(int argc, char **argv) {
         std::cerr << "Could not read file " << argv[1] << std::endl;
         return 1;
     }
-    Cartridge cart(file);
+    auto cart = std::make_shared<Cartridge>(file);
+
+    nes.load_cartridge(cart);
 
     return 0;
 }
