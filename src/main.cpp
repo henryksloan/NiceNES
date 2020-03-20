@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     auto cart = std::make_shared<Cartridge>(file);
 
     nes.load_cartridge(cart);
-    nes.cycle();
+    for (int i = 0; i < 100; i++) nes.cycle();
 
     return 0;
 }

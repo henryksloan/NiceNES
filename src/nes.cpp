@@ -41,11 +41,21 @@ NES::NES() {
 void NES::load_cartridge(std::shared_ptr<Cartridge> cart) {
     cpu_mapped_ram->load_cartridge(cart);
     ppu_mapped_ram->load_cartridge(cart);
+    cpu->reset();
+    // ppu->reset();
+
+    // std::ofstream cpu_ram_file("cpu_ram.bin", std::ifstream::binary);
+    // for (int addr = 0; addr < 0x10000; addr++) {
+    //     cpu_ram_file << cpu_mapped_ram->read_byte(addr);
+    // }
+
+    // std::ofstream ppu_ram_file("ppu_ram.bin", std::ifstream::binary);
+    // for (int addr = 0; addr < 0x10000; addr++) {
+    //     ppu_ram_file << ppu_mapped_ram->read_byte(addr);
+    // }
 }
 
 void NES::cycle() {
     cpu->step();
     ppu->cpu_cycle();
-
-    std::cout << cpu_mapped_ram->read_byte(0x0) << std::endl;
 }
