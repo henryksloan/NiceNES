@@ -11,8 +11,8 @@
 template<size_t SIZE>
 class MirroredRAM : public RAM<SIZE> {
  public:
-    MirroredRAM(const std::vector<std::unique_ptr<Mirror>> &mirrors)
-        : mirrors(mirrors) {};
+    MirroredRAM(std::vector<std::unique_ptr<Mirror>> mirrors)
+        : mirrors(std::move(mirrors)) {};
 
     virtual inline void write_byte(uint16_t addr, uint8_t data) {
         RAM<SIZE>::write_byte(map(addr), data);
@@ -43,8 +43,8 @@ class MirroredRAM : public RAM<SIZE> {
     }
 
  protected:
-    uint16_t map(uint16_t addr);
+    uint16_t map(uint16_t addr) const;
 
  private:
-    const std::vector<std::unique_ptr<Mirror>> &mirrors;
+    std::vector<std::unique_ptr<Mirror>> mirrors;
 };

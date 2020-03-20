@@ -158,15 +158,10 @@ void PPU::back_fetch() {
     // Each tile takes 8 cycles: 4 accesses taking 2 cycles each
     switch ((scan.cycle - 1) % 8) {
         case 0: { // Feed from latches to shift registers
-            /*
-             * Every 8 cycles, the top byte of the each of the two
-             * 16-bit tile shift registers are filled by the latches.
-             * These registers correspond to a tile's high and low pattern table bytes
-             */
-            back.tile[0] &= 0xFF00;
-            back.tile[0] |= back.latches.tile_lo;
-            back.tile[1] &= 0xFF00;
-            back.tile[1] |= back.latches.tile_hi;
+            // Every 8 cycles, the low byte of the each of the two
+            // 16-bit tile shift registers are filled by the latches.
+            back.tile[0].lo = back.latches.tile_lo;
+            back.tile[1].lo = back.latches.tile_hi;
 
             // Likewise, these two bits are the high and low attribute bytes
             // This latch is later shifted into the attribute shift registers `attr`
@@ -205,6 +200,7 @@ void PPU::back_fetch() {
 void PPU::sprite_fetch() {
     // Sprite data is fetched on cycles 257-320
     // Each sprite tile takes 8 cycles: 4 accesses taking 2 cycles each
+    const int sprite = (scan.cycle - 257) / 8;
     switch ((scan.cycle - 1) % 8) {
         case 0: { // Garbage nametable byte
             // TODO
