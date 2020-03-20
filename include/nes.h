@@ -17,6 +17,7 @@ class NES {
     NES();
 
     void load_cartridge(std::shared_ptr<Cartridge> cart);
+    void cycle();
 
  private:
     std::unique_ptr<CPU6502> cpu;

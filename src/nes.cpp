@@ -42,3 +42,10 @@ void NES::load_cartridge(std::shared_ptr<Cartridge> cart) {
     cpu_mapped_ram->load_cartridge(cart);
     ppu_mapped_ram->load_cartridge(cart);
 }
+
+void NES::cycle() {
+    cpu->step();
+    ppu->cpu_cycle();
+
+    std::cout << cpu_mapped_ram->read_byte(0x0) << std::endl;
+}

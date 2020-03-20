@@ -1,6 +1,8 @@
 #include "cartridge.h"
 
 bool Cartridge::read_byte(MapperResult target, uint16_t addr, uint8_t &data) {
+    if (!mapper) return false;
+
     uint16_t mapped_addr;
     auto result = mapper->map_read(addr, mapped_addr);
     if (result != target) return false;
@@ -18,6 +20,8 @@ bool Cartridge::read_byte(MapperResult target, uint16_t addr, uint8_t &data) {
 }
 
 bool Cartridge::write_byte(MapperResult target, uint16_t addr, uint8_t data) {
+    if (!mapper) return false;
+
     uint16_t mapped_addr;
     auto result = mapper->map_write(addr, mapped_addr, data);
     if (result != target) return false;
@@ -35,7 +39,7 @@ bool Cartridge::write_byte(MapperResult target, uint16_t addr, uint8_t data) {
 }
 
 void Cartridge::reset() {
-    if (mapper != nullptr) mapper->reset();
+    if (!mapper) mapper->reset();
 }
 
 Cartridge::MetaData Cartridge::parse_header(std::ifstream &file) {
