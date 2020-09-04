@@ -16,12 +16,20 @@ enum class MirroringMode {
 
 class Cartridge {
  public:
+    Cartridge() {}
+
     Cartridge(std::ifstream &file)
         : meta(parse_header(file)) {
         populate_rom(file);
-    };
+    }
 
-    const struct MetaData {
+    void reload(std::ifstream &file) {
+        meta = parse_header(file);
+        populate_rom(file);
+    }
+
+    // const struct MetaData {
+    struct MetaData {
         int n_prg_banks;
         int n_chr_banks;
         MirroringMode mirroring;
@@ -31,6 +39,18 @@ class Cartridge {
         bool is_VS;
         bool is_PC10;
     } meta;
+
+    bool read_byte(uint16_t addr, uint8_t &data) {
+        if (addr >= 0xC000 && addr <= 0xFFFF && prg.size() > 0) {
+            data = prg[(addr - 0xC000) % prg.size()];
+            return true;
+        }
+        return false;
+    }
+
+    uint8_t &ref_byte(uint16_t addr) {
+        return prg.at((addr - 0xC000) % prg.size());
+    }
 
  private:
     // parse_header populates meta, leaving file iterator right after the header

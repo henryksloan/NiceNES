@@ -1,6 +1,6 @@
 #include "nes.h"
 
-NES::NES() {
+NES::NES() : cart(std::make_shared<Cartridge>()) {
     CPUAccessor cpu_accessor;
 
     // PPU memory map
@@ -27,8 +27,11 @@ NES::NES() {
     mirrors.push_back(std::move(ram_mirror));
     mirrors.push_back(std::move(ppu_reg_mirror));
     std::vector<std::unique_ptr<MappedRegisters>> reg_maps;
-    reg_maps.push_back(std::move(ppu_reg_map));
-    auto main_ram = std::make_shared<BussedRAM<0x10000>>(std::move(mirrors), std::move(reg_maps));
+    // reg_maps.push_back(std::move(ppu_reg_map));
+    // auto main_ram = std::make_shared<BussedRAM<0x10000>>(std::move(mirrors), std::move(reg_maps), cart);
+    main_ram = std::make_shared<BussedRAM<0x10000>>(std::move(mirrors), std::move(reg_maps), cart);
+    main_ram->write_word(RST_VEC, 0xC000);
+
     cpu = std::make_unique<CPU6502>(main_ram);
 
     cpu_accessor.set_nmi(std::bind(&CPU6502::nmi, cpu.get()));
